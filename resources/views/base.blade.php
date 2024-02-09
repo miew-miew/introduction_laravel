@@ -25,6 +25,21 @@ $routeName = request()->route()->getName();
                         <a @class(['nav-link', 'active' => str_starts_with($routeName, 'blog.')]) aria-current="page" href="{{ route('blog.index') }}">Accueil</a>
                     </li>
                 </ul>
+                <div class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <p style="color:white">
+                        @auth
+                            {{ Auth::user()->name}}
+                            <form class="nav-item" action="{{ route('auth.logout') }}" method="post">
+                        @method('delete')
+                        @csrf
+                        <button class="btn btn-secondary">Se déconnecter</button>
+                    </form>
+                        @endauth
+                    </p>
+                    @guest
+                        <a class="btn btn-secondary" href="{{ route('auth.login') }}">Se connecter</a>
+                    @endguest
+                </div>
             </div>
         </div>
     </nav>
