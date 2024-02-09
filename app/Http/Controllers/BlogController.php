@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\BlogFilterRequest;
 use App\Http\Requests\FormPostRequest;
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -41,6 +42,10 @@ class BlogController extends Controller
 
     public function index(BlogFilterRequest $request): View
     {
+        $category = Category::find(1);
+        $post = Post::find(7);
+        $post->category()->associate($category);
+        $post->save();
         return view('blog.index', [
             'posts' => Post::paginate(1)
         ]);
