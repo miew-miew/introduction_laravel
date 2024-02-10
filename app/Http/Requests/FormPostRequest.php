@@ -27,7 +27,8 @@ class FormPostRequest extends FormRequest
             'slug' => ['required', 'regex:/^[a-z0-9\-]+$/', Rule::unique('posts')->ignore($this->route()->parameter('post'))],
             'content' => ['required'],
             'category_id' => ['required', 'exists:categories,id'],
-            'tags' => ['array', 'exists:tags,id', 'required']
+            'tags' => ['array', 'exists:tags,id', 'required'],
+            'image' => ['image', 'max:2000']
         ];
     }
 

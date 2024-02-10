@@ -10,7 +10,8 @@ use App\Models\User;
 use Illuminate\Http\Request; 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\Pagination\Paginator; 
-use Illuminate\Support\Facades\Hash; 
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator; 
 use Illuminate\View\View; 
 
@@ -29,7 +30,7 @@ class BlogController extends Controller
 
     public function store(FormPostRequest $request) 
     {
-        $post = Post::create($request->validated()); // Crée un nouvel article avec les données validées du formulaire
+        $post = Post::create($this->extractData(new Post(), $request)); // Crée un nouvel article avec les données validées du formulaire
         $post->tags()->sync($request->validated('tags')); // Associe les tags à l'article
         return redirect()->route('blog.show', ['slug' => $post->slug, 'post' => $post->id])->with('success', "L'article a bien été sauvegardé"); // Redirige vers la vue de l'article avec un message de succès
     }
@@ -43,9 +44,24 @@ class BlogController extends Controller
     }
 
     public function update(Post $post, FormPostRequest $request){ 
-        $post->update($request->validated()); // Met à jour l'article avec les données validées du formulaire
+        $post->update($this->extractData($post, $request)); // Met à jour l'article avec les données validées du formulaire
         $post->tags()->sync($request->validated('tags')); // Met à jour les tags associés à l'article
         return redirect()->route('blog.show', ['slug' => $post->slug, 'post' => $post->id])->with('success', "L'article a bien été modifié"); // Redirige vers la vue de l'article avec un message de succès
+    }
+
+    private function extractData (Post $post, FormPostRequest $request): array
+    {
+        $data = $request->validated();
+        /** @var UploadedFile|null $image */
+        $image = $request->validated('image');
+        if($image === null || $image->getError()){
+            return $data;
+        }
+        if($post->image){
+            Storage::disk('public')->delete($post->image);
+        }
+            $data['image'] = $image->store('blog', 'public');
+            return $data;
     }
 
     public function index(): View 
